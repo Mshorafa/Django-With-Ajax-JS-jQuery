@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form action="{% url 'dropz:fileUploud' %}" method="POST" class="dropzone dz mt-5" id="my_dropZ">
+        {% csrf_token %}
+        <div class="fallback">
+            <input name="file" type="file" multiple/>
+        </div>
+    </form>
+
+
+    <script>
+        Dropzone.autoDiscover = false
+
+        const my_DropZone = new Dropzone("#my_dropZ",{
+            url: '{% url 'dropz:fileUploud' %}',
+            maxFiles: 6,
+            maxFilesize: 2,
+            acceptedFiles:'.jpg',
+
+        })
+    </script>
+
+{% endblock %}

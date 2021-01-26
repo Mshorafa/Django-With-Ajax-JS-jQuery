@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <form action="" class="mt-5" id="car-form">
+     <div id="alert-box"></div><br>
+        {% csrf_token %}
+        <div class="ui selection dropdown" id="cars">
+            <input type="hidden" name="car">
+            <i class="dropdown icon"></i>
+            <div class="default text" id="text-car">Choose the car</div>
+            <div class="menu" id="cars-data-box">
+                {#                {% for qs_car in qs_cars %}#}
+                {#                    <div class="item" data-value="{{ qs_car }}">{{ qs_car.name }}</div>#}
+                {#                {% endfor %}#}
+            </div>
+        </div>
+
+        <div class="ui selection dropdown" id="models">
+            <input type="hidden" name="model">
+            <i class="dropdown icon"></i>
+            <div class="default text" id="text-model">Choose the model</div>
+            <div class="menu" id="models-data-box">
+                {#                {% for qs_car in qs_cars %}#}
+                {#                    <div class="item" data-value="{{ qs_car }}">{{ qs_car.name }}</div>#}
+                {#                {% endfor %}#}
+            </div>
+        </div>
+
+        <div id="btn-box" class="mt-2 not-visble">
+            <button type="submit" class="ui primary button">Save</button>
+        </div>
+
+    </form>
+
+
+
+    <script>
+        $.ajax({
+            type: 'GET',
+            url: '{% url 'orders:json-data'%}',
+            {#url:'/orders/json-data/',#}
+            success: function (response) {
+                {#console.log(response.data)#}
+                const data = response.data
+                let resdata = ''
+                data.map(item => {
+                    resdata += `<div class="item" data-value="${item.name}">${item.name}</div>`
+                })
+                $('#cars-data-box').append(resdata)
+
+            },
+            error: function (error) {
+                console.log(error)
+            }
+        });
+
+        $('#cars').on('change', function (e) {
+            const SelectedCar = e.target.value
+            $('#alert-box').html('')
+            $('#btn-box').addClass("not-visble")
+            $('#models-data-box').html('')
+            $('#text-model').text('Choose the model').addClass('default')
+            $('#box-btn').removeClass('not-visble')
+            $.ajax({
+                type: 'GET',
+                url: `/orders/select-car/${SelectedCar}`,
+                success: function (response) {
+                    const obj_model = response.obj_model
+                    let resdata = ''
+                    obj_model.map(item => {
+                        resdata += `<div class="item" data-value="${item.name}">${item.name}</div>`
+                    })
+                    $('#models-data-box').append(resdata)
+                    $('#models').on('change', function (e) {
+                        $('#btn-box').removeClass("not-visble")
+                    })
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+            })
+        });
+
+        $('#car-form').on('submit', function (e) {
+            e.preventDefault()
+            const csrf = $('input[name="csrfmiddlewaretoken"]').val()
+            console.log($('#text-car').text())
+            console.log($('#text-model').text())
+
+            $.ajax({
+                type: 'POST',
+                url: '{% url 'orders:create-Order' %}',
+                data: {
+                    'csrfmiddlewaretoken': csrf,
+                    'car': $('#text-car').text(),
+                    'model': $('#text-model').text(),
+                },
+                success: function (response) {
+                    $('#alert-box').html(`
+                    <div class="ui success message">
+                        <div class="header">
+                           Your user Order was successful Placed.
+                        </div>
+                    </div>
+                    `)
+
+                },
+                error: function (error) {
+                    $('#alert-box').html(`
+                    <div class="ui error message">
+                        <div class="header">
+                           There were some errors with your Order
+                        </div>
+                    </div>
+                    `)
+                }
+            })
+        })
+    </script>
+{% endblock %}

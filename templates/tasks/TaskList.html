@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Task List Page
+{% endblock %}
+
+{% block content %}
+    <div class="col-8 mt-5">
+        <form action="" method="post" class="form-inline  justify-content-center" id="createdTaskForm" data-url="{% url 'task:TaskListUrl' %}">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="mx-3">
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <button type="button" class="btn btn-outline-success" id="createdButton">Create</button>
+        </form>
+    </div>
+
+    <div class="col-5 mt-5" id="taskList">
+        {% for task in tasks %}
+            <div class="card mb-1" id="taskCard" data-id="{{ task.id }}"  data-url="{% url 'task:Completed_Task' task.id%}" style="{% if task.completaed %}
+            text-decoration: line-through;
+            {% endif %} ">
+                <div class="card-body">
+                    {{ task.title}}
+                    <button type="button" class="close" data-url="{% url 'task:Remove_Task' task.id %}">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+{% endblock %}
